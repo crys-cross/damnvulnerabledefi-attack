@@ -31,3 +31,7 @@ DO NOT USE IN PRODUCTION.
 ### 2 - Naive receiver
 
 - Anyone can call the flashLoan() function in NaiveReceiverLenderPool contract since the check is only available in the FlashLoanReceiver contract. Calling the function multiple times with the User address as borrower will drain it with the Fixed fee. Calling the function ten times since fixed fee is 1 ETH.
+
+### 3 - Truster
+
+- Attacker can approve a maliscious contract to drain the DVT tokens.
