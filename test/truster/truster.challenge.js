@@ -37,7 +37,10 @@ describe("[Challenge] Truster", function () {
 
   after(async function () {
     /** SUCCESS CONDITIONS */
-
+    this.exploit = await TrusterExploit.new({ from: attacker });
+    await this.exploit.attack(this.pool.address, this.token.address, {
+      from: attacker,
+    });
     // Attacker has taken all tokens from the pool
     expect(await this.token.balanceOf(attacker.address)).to.equal(
       TOKENS_IN_POOL

