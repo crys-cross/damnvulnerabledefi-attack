@@ -35,3 +35,7 @@ DO NOT USE IN PRODUCTION.
 ### 3 - Truster
 
 - Attacker can approve a maliscious contract to drain the DVT tokens.
+
+### 4 - Side entrance
+
+- A
