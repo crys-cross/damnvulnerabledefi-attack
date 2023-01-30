@@ -39,3 +39,7 @@ DO NOT USE IN PRODUCTION.
 ### 4 - Side entrance
 
 - Attacker can call flashloan and deposit the amount then immediatly withdraw.
+
+### 5 - The Rewarder
+
+- When the new rounds of rewards start, Attacker will get a flashloan of all the DVT tokens and then deposit to the rewarder pool contract thus will trigger the distribute all to the Attacker. Then immediately withdraw to payy all the tokens.
