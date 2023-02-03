@@ -47,3 +47,7 @@ DO NOT USE IN PRODUCTION.
 ### 6 - Selfie
 
 - Attacker can drain all the funds from the pool by activating the drainAllFunds() function. Attacker needs to meet use the SimpleGovernance contract and satisfy its condition of having half the governance token in the snapshot. It could be done by borrowing in lending pool then taking a snapshot then run executeAction() function after the ACTION_DELAY_IN_SECONDS has passed.
+
+### 7 - Compromised
+
+- The strange snippet was actually the private keys and thus with that the atcker can manipulate the oracle to manipulate the price to zero then buy the nft then manipulate the price back to something expensive then sell the nft.
