@@ -51,3 +51,7 @@ DO NOT USE IN PRODUCTION.
 ### 7 - Compromised
 
 - The strange snippet was actually the private keys and thus with that the atcker can manipulate the oracle to manipulate the price to zero then buy the nft then manipulate the price back to something expensive then sell the nft.
+
+### 8 - Puppet
+
+- Attacker can manipulate the price of the token from the oracle function by manipulating the balance of the Uniswap pool.
