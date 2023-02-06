@@ -54,4 +54,4 @@ DO NOT USE IN PRODUCTION.
 
 ### 8 - Puppet
 
-- Attacker can manipulate the price of the token from the oracle function by manipulating the balance of the Uniswap pool.
+- Attacker can manipulate the price of the token from the oracle function by manipulating the balance of the Uniswap pool. Attacker exchanges all his tokens to ETH so that the price of tokens drop and attacker may now borrow all the tokens with the new discounted price of around 19-20 ETH thus draining the contract of all of its token.
