@@ -55,3 +55,7 @@ DO NOT USE IN PRODUCTION.
 ### 8 - Puppet
 
 - Attacker can manipulate the price of the token from the oracle function by manipulating the balance of the Uniswap pool. Attacker exchanges all his tokens to ETH so that the price of tokens drop and attacker may now borrow all the tokens with the new discounted price of around 19-20 ETH thus draining the contract of all of its token.
+
+### 8 - Puppet-v2
+
+- Very similar to above that Attcker may once again manipulate oracle price by swapping the tokens then borrowing or getting a loan with no plans of paying it back thus efectively draining all the DVT from the contract.
