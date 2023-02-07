@@ -62,4 +62,4 @@ DO NOT USE IN PRODUCTION.
 
 ### 10 - Free Rider
 
-- A
+- There is a vulnerability with the buyMany() function in FreeRiderNFTMarketplace contract in which attacker may buy multiple nft with only paying the price of one. The contract will pay for the unpaid NFT by the attacker acting as buyer. Using a flashloan the player can barrow the needed fund and both be the buyer and seller to buy all of the NFT. This will also effectively drain the contract's ETH since it is paying for the unpaid eventually then forward to FreeRiderBuyer contract to claim the reward.
