@@ -137,11 +137,16 @@ describe("[Challenge] Free Rider", function () {
       NFT_PRICE
     );
     await freeRiderAttack.hack();
-    // TODO: console.log all below
+    // TODO: check NFTs are transfered to buyer contract
     // Attacker must have earned all ETH from the payout
     console.log(
-      `Attackers Balance wei: ${await ethers.utils.formatEther(
+      `Attackers Balance: ${await ethers.utils.formatEther(
         await (await ethers.provider.getBalance(attacker.address)).toString()
+      )}`
+    );
+    console.log(
+      `Buyers Contract Balance: ${await ethers.utils.formatEther(
+        await ethers.provider.getBalance(this.buyerContract.address)
       )}`
     );
     // The buyer extracts all NFTs from its associated contract
@@ -155,8 +160,7 @@ describe("[Challenge] Free Rider", function () {
     // }
     // Exchange must have lost NFTs and ETH
     console.log(
-      "Amount of NFT for sale: ",
-      await this.marketplace.amountOfOffers().toString()
+      `Amount of NFT for sale: ${await this.marketplace.amountOfOffers()}`
     );
     console.log(
       "NFTmarketplace balance is: ",

