@@ -111,5 +111,9 @@ contract WalletRegistry is IProxyCreationCallback, Ownable {
 }
 
 contract BackdoorHack {
-    function attack() external {}
+    // run attack via constructor as initializer
+    constructor() {
+        // create wallet for each beneficiary here(for loop each wallet)
+        // wallet will receieve DVT via callback then transfer to msg.sender
+    }
 }
