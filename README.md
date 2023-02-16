@@ -67,3 +67,7 @@ DO NOT USE IN PRODUCTION.
 ### 11 - Backdoor
 
 - The beneficiaries in this situation has not yet setup for each wallet and so the attacker can at this point setup the wallets and claim the token for himself.
+
+### 12 - Climber
+
+- T
