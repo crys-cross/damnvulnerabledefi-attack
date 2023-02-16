@@ -66,7 +66,7 @@ DO NOT USE IN PRODUCTION.
 
 ### 11 - Backdoor
 
-- The beneficiaries in this situation has not yet setup for each wallet and so the attacker can at this point setup the wallets and claim the token for himself.
+- The beneficiaries in this situation has not yet setup for each wallet and so the attacker can at this point setup the wallets and claim the token for himself. The contract itself was suposed to be secure but since the users didn't know how to use the contract, the attacker was able to use the logic of the contract to transfer the contract to himself.
 
 ### 12 - Climber
 
