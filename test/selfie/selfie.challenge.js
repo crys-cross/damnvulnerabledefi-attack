@@ -1,69 +1,60 @@
 const { ethers } = require("hardhat");
 const { expect } = require("chai");
+const { time } = require("@nomicfoundation/hardhat-network-helpers");
 
 describe("[Challenge] Selfie", function () {
-  let deployer, attacker;
+  let deployer, player;
+  let token, governance, pool;
 
-  const TOKEN_INITIAL_SUPPLY = ethers.utils.parseEther("2000000"); // 2 million tokens
-  const TOKENS_IN_POOL = ethers.utils.parseEther("1500000"); // 1.5 million tokens
+  const TOKEN_INITIAL_SUPPLY = 2000000n * 10n ** 18n;
+  const TOKENS_IN_POOL = 1500000n * 10n ** 18n;
 
   before(async function () {
     /** SETUP SCENARIO - NO NEED TO CHANGE ANYTHING HERE */
-    [deployer, attacker] = await ethers.getSigners();
+    [deployer, player] = await ethers.getSigners();
 
-    const DamnValuableTokenSnapshotFactory = await ethers.getContractFactory(
-      "DamnValuableTokenSnapshot",
-      deployer
-    );
-    const SimpleGovernanceFactory = await ethers.getContractFactory(
-      "SimpleGovernance",
-      deployer
-    );
-    const SelfiePoolFactory = await ethers.getContractFactory(
-      "SelfiePool",
-      deployer
-    );
+    // Deploy Damn Valuable Token Snapshot
+    token = await (
+      await ethers.getContractFactory("DamnValuableTokenSnapshot", deployer)
+    ).deploy(TOKEN_INITIAL_SUPPLY);
 
-    this.token = await DamnValuableTokenSnapshotFactory.deploy(
-      TOKEN_INITIAL_SUPPLY
-    );
-    this.governance = await SimpleGovernanceFactory.deploy(this.token.address);
-    this.pool = await SelfiePoolFactory.deploy(
-      this.token.address,
-      this.governance.address
-    );
+    // Deploy governance contract
+    governance = await (
+      await ethers.getContractFactory("SimpleGovernance", deployer)
+    ).deploy(token.address);
+    expect(await governance.getActionCounter()).to.eq(1);
 
-    await this.token.transfer(this.pool.address, TOKENS_IN_POOL);
+    // Deploy the pool
+    pool = await (
+      await ethers.getContractFactory("SelfiePool", deployer)
+    ).deploy(token.address, governance.address);
+    expect(await pool.token()).to.eq(token.address);
+    expect(await pool.governance()).to.eq(governance.address);
 
-    expect(await this.token.balanceOf(this.pool.address)).to.be.equal(
-      TOKENS_IN_POOL
-    );
+    // Fund the pool
+    await token.transfer(pool.address, TOKENS_IN_POOL);
+    await token.snapshot();
+    expect(await token.balanceOf(pool.address)).to.be.equal(TOKENS_IN_POOL);
+    expect(await pool.maxFlashLoan(token.address)).to.eq(TOKENS_IN_POOL);
+    expect(await pool.flashFee(token.address, 0)).to.eq(0);
   });
 
-  it("Exploit", async function () {
-    /** CODE YOUR EXPLOIT HERE */
-    const attackSelfieFactory = await ethers.getContractFactory(
-      "AttackSelfie",
-      attacker
-    );
-    const attackSelfie = await attackSelfieFactory.deploy(
-      this.token.address,
-      this.pool.address,
-      this.governance.address
-    );
-    await attackSelfie.attack();
+  it("Execution", async function () {
+    /** CODE YOUR SOLUTION HERE */
+    this.selfieHack = await (
+      await ethers.getContractFactory("SelfieHack", attacker)
+    ).deploy(this.token.address, this.pool.address, this.governance.address);
+    await this.selfieHack.attack();
     // increase time to 2 days
     await ethers.provider.send("evm_increaseTime", [2 * 24 * 60 * 60]); // 2 days
-    await attackSelfie.attack2();
+    await this.selfieHack.attack2();
   });
 
   after(async function () {
-    /** SUCCESS CONDITIONS */
+    /** SUCCESS CONDITIONS - NO NEED TO CHANGE ANYTHING HERE */
 
-    // Attacker has taken all tokens from the pool
-    expect(await this.token.balanceOf(attacker.address)).to.be.equal(
-      TOKENS_IN_POOL
-    );
-    expect(await this.token.balanceOf(this.pool.address)).to.be.equal("0");
+    // Player has taken all tokens from the pool
+    expect(await token.balanceOf(player.address)).to.be.equal(TOKENS_IN_POOL);
+    expect(await token.balanceOf(pool.address)).to.be.equal(0);
   });
 });

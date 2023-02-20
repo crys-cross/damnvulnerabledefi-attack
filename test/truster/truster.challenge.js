@@ -2,46 +2,31 @@ const { ethers } = require("hardhat");
 const { expect } = require("chai");
 
 describe("[Challenge] Truster", function () {
-  let deployer, attacker;
+  let deployer, player;
+  let token, pool;
 
-  const TOKENS_IN_POOL = ethers.utils.parseEther("1000000");
+  const TOKENS_IN_POOL = 1000000n * 10n ** 18n;
 
   before(async function () {
     /** SETUP SCENARIO - NO NEED TO CHANGE ANYTHING HERE */
-    [deployer, attacker] = await ethers.getSigners();
+    [deployer, player] = await ethers.getSigners();
 
-    const DamnValuableToken = await ethers.getContractFactory(
-      "DamnValuableToken",
-      deployer
-    );
-    const TrusterLenderPool = await ethers.getContractFactory(
-      "TrusterLenderPool",
-      deployer
-    );
+    token = await (
+      await ethers.getContractFactory("DamnValuableToken", deployer)
+    ).deploy();
+    pool = await (
+      await ethers.getContractFactory("TrusterLenderPool", deployer)
+    ).deploy(token.address);
+    expect(await pool.token()).to.eq(token.address);
 
-    this.token = await DamnValuableToken.deploy();
-    this.pool = await TrusterLenderPool.deploy(this.token.address);
+    await token.transfer(pool.address, TOKENS_IN_POOL);
+    expect(await token.balanceOf(pool.address)).to.equal(TOKENS_IN_POOL);
 
-    await this.token.transfer(this.pool.address, TOKENS_IN_POOL);
-
-    expect(await this.token.balanceOf(this.pool.address)).to.equal(
-      TOKENS_IN_POOL
-    );
-
-    expect(await this.token.balanceOf(attacker.address)).to.equal("0");
+    expect(await token.balanceOf(player.address)).to.equal(0);
   });
 
-  it("Exploit", async function () {
-    /** CODE YOUR EXPLOIT HERE  */
-    // const TrusterExploit = await ethers.getContractFactory(
-    //   "TrusterExploit",
-    //   attacker
-    // );
-    // this.exploit = await TrusterExploit.deploy();
-    // await this.exploit
-    //   .connect(attacker)
-    //   .attack(this.pool.address, this.token.address);
-    //alternative below with no separate contract//
+  it("Execution", async function () {
+    /** CODE YOUR SOLUTION HERE */
     console.log("attacker address is: ", attacker.address);
     const iface = new ethers.utils.Interface([
       "function approve(address spender, uint256 amount)",
@@ -59,15 +44,10 @@ describe("[Challenge] Truster", function () {
   });
 
   after(async function () {
-    /** SUCCESS CONDITIONS */
-    // this.exploit = await TrusterExploit.new({ from: attacker });
-    // await this.exploit.attack(this.pool.address, this.token.address, {
-    //   from: attacker,
-    // });
-    // Attacker has taken all tokens from the pool
-    expect(await this.token.balanceOf(attacker.address)).to.equal(
-      TOKENS_IN_POOL
-    );
-    expect(await this.token.balanceOf(this.pool.address)).to.equal("0");
+    /** SUCCESS CONDITIONS - NO NEED TO CHANGE ANYTHING HERE */
+
+    // Player has taken all tokens from the pool
+    expect(await token.balanceOf(player.address)).to.equal(TOKENS_IN_POOL);
+    expect(await token.balanceOf(pool.address)).to.equal(0);
   });
 });

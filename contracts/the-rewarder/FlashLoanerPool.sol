@@ -9,13 +9,16 @@ import "../DamnValuableToken.sol";
 /**
  * @title FlashLoanerPool
  * @author Damn Vulnerable DeFi (https://damnvulnerabledefi.xyz)
-
- * @dev A simple pool to get flash loans of DVT
+ * @dev A simple pool to get flashloans of DVT
  */
 contract FlashLoanerPool is ReentrancyGuard {
     using Address for address;
 
     DamnValuableToken public immutable liquidityToken;
+
+    error NotEnoughTokenBalance();
+    error CallerIsNotContract();
+    error FlashLoanNotPaidBack();
 
     constructor(address liquidityTokenAddress) {
         liquidityToken = DamnValuableToken(liquidityTokenAddress);
@@ -23,12 +26,14 @@ contract FlashLoanerPool is ReentrancyGuard {
 
     function flashLoan(uint256 amount) external nonReentrant {
         uint256 balanceBefore = liquidityToken.balanceOf(address(this));
-        require(amount <= balanceBefore, "Not enough token balance");
 
-        require(
-            msg.sender.isContract(),
-            "Borrower must be a deployed contract"
-        );
+        if (amount > balanceBefore) {
+            revert NotEnoughTokenBalance();
+        }
+
+        if (!msg.sender.isContract()) {
+            revert CallerIsNotContract();
+        }
 
         liquidityToken.transfer(msg.sender, amount);
 
@@ -36,10 +41,9 @@ contract FlashLoanerPool is ReentrancyGuard {
             abi.encodeWithSignature("receiveFlashLoan(uint256)", amount)
         );
 
-        require(
-            liquidityToken.balanceOf(address(this)) >= balanceBefore,
-            "Flash loan not paid back"
-        );
+        if (liquidityToken.balanceOf(address(this)) < balanceBefore) {
+            revert FlashLoanNotPaidBack();
+        }
     }
 }
 
@@ -48,7 +52,7 @@ import "../DamnValuableToken.sol";
 import "./AccountingToken.sol";
 import "./TheRewarderPool.sol";
 
-contract AttackReward {
+contract RewardHack {
     FlashLoanerPool public pool;
     DamnValuableToken public token;
     TheRewarderPool public rewardPool;
