@@ -163,7 +163,7 @@ contract BackdoorHack {
         registryAddress = _registry;
         masterCopyAddress = _masterCopy;
         walletFactory = _walletFactory;
-        token = _token;
+        token = IERC20(_token);
     }
 
     function delegateApprove(address _spender) external {

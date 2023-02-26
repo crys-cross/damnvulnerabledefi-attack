@@ -55,9 +55,8 @@ describe("[Challenge] Naive receiver", function () {
 
   it("Execution", async function () {
     /** CODE YOUR SOLUTION HERE */
-    console.log("attacker address is: ", attacker.address);
     for (let i = 0; i < 10; i++) {
-      await this.pool.connect(attacker).flashLoan(this.receiver.address, 0);
+      await pool.connect(player).flashLoan(receiver.address, 0);
     }
   });
 

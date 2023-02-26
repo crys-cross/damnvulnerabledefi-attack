@@ -47,6 +47,8 @@ contract FlashLoanerPool is ReentrancyGuard {
     }
 }
 
+import "./TheRewarderPool.sol";
+
 contract RewardHack {
     FlashLoanerPool public pool;
     DamnValuableToken public token;
