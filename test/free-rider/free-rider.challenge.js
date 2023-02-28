@@ -124,11 +124,9 @@ describe("[Challenge] Free Rider", function () {
 
   it("Exploit", async function () {
     /** CODE YOUR EXPLOIT HERE */
-    const FreeRiderAttackFactory = await ethers.getContractFactory(
-      "FreeRiderAttack",
-      attacker
-    );
-    const freeRiderAttack = await FreeRiderAttackFactory.deploy(
+    const freeRiderHack = await (
+      await ethers.getContractFactory("FreeRiderHack", attacker)
+    ).deploy(
       this.uniswapPair.address,
       this.marketplace.address,
       this.weth.address,
@@ -136,7 +134,7 @@ describe("[Challenge] Free Rider", function () {
       AMOUNT_OF_NFTS,
       NFT_PRICE
     );
-    await freeRiderAttack.hack();
+    await freeRiderHack.attack();
     // TODO: check NFTs are transfered to buyer contract
     // Attacker must have earned all ETH from the payout
     console.log(
@@ -149,15 +147,6 @@ describe("[Challenge] Free Rider", function () {
         await ethers.provider.getBalance(this.buyerContract.address)
       )}`
     );
-    // The buyer extracts all NFTs from its associated contract
-    // for (let tokenId = 0; tokenId < AMOUNT_OF_NFTS; tokenId++) {
-    //   await this.nft
-    //     .connect(buyer)
-    //     .transferFrom(this.buyerContract.address, buyer.address, tokenId);
-    //   console.log(
-    //     `Owner of ${tokenId} is : ${await this.nft.ownerOf(tokenId)}`
-    //   );
-    // }
     // Exchange must have lost NFTs and ETH
     console.log(
       `Amount of NFT for sale: ${await this.marketplace.amountOfOffers()}`

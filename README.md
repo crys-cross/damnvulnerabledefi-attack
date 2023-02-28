@@ -24,6 +24,8 @@ DO NOT USE IN PRODUCTION.
 
 ## Solutions
 
+- All contracts of levels needing a contract as part of the solution can be found at ./contracts/player-contracts and script at individual level test script at EXECUTION line. Description of individual solution level below.
+
 ### 1 - Unstoppable
 
 - The contract checks for deposited funds in line 40 of UnstoppableLender contract. If the contract receives external funds, the poolBalance will no longer be equal to balanceBefore and will cause the error thus stopping flashloan() function and making it unuseable.
