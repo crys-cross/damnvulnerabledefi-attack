@@ -31,10 +31,10 @@ describe("[Challenge] Side entrance", function () {
 
   it("Execution", async function () {
     /** CODE YOUR SOLUTION HERE */
-    this.sideEntranceHack = await (
-      await ethers.getContractFactory("SideEntranceHack", attacker)
-    ).deploy(this.pool.address);
-    this.sideEntranceHack.connect(attacker).attack();
+    const sideEntranceHack = await (
+      await ethers.getContractFactory("SideEntranceHack", player)
+    ).deploy(pool.address);
+    await sideEntranceHack.connect(player).attack();
   });
 
   after(async function () {
