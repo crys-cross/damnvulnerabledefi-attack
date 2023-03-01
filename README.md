@@ -73,3 +73,7 @@ DO NOT USE IN PRODUCTION.
 ### 12 - Climber
 
 - In ClimberTimelock contract, the function execute() is stated that it can be executed by anyone. The Attacker can execute a proposal that does not exist and make it as if it did exist and was ready to be executed after. With this, Attacker may grant himself the proposer role then change the logic contract with a proposal to be able to drain all the funds with no requirement.
+
+### 13 - Safe Miners
+
+- Address was stated to be empty and so Attacker can brute force create multiple contracts that could match the address which holds the funds and transfer it to all to the atacker.
