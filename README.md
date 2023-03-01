@@ -22,6 +22,8 @@ DO NOT USE IN PRODUCTION.
 
 ## Solutions
 
+**Please view v2-solutions branch for v2.2.0 solutions of damnvulnerabledefi.**
+
 - All contracts of levels needing a contract as part of the solution can be found at ./contracts/player-contracts and script at individual level test script at EXECUTION line. Description of individual solution level below.
 
 ### 1 - Unstoppable
