@@ -43,7 +43,7 @@ describe("[Challenge] Selfie", function () {
   it("Exploit", async function () {
     /** CODE YOUR EXPLOIT HERE */
     const attackSelfieFactory = await ethers.getContractFactory(
-      "AttackSelfie",
+      "SelfieHack",
       attacker
     );
     const attackSelfie = await attackSelfieFactory.deploy(
