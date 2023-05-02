@@ -16,7 +16,7 @@ contract SelfieHack {
         gov = SimpleGovernance(_gov);
     }
 
-    // receive() external payable {}
+    receive() external payable {}
 
     fallback() external payable {
         token.snapshot();
