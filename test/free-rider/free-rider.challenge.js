@@ -127,12 +127,12 @@ describe("[Challenge] Free Rider", function () {
   it("Execution", async function () {
     /** CODE YOUR SOLUTION HERE */
     this.freeRiderHack = await (
-      await ethers.getContractFactory("FreeRiderHack", attacker)
+      await ethers.getContractFactory("FreeRiderHack", player)
     ).deploy(
-      this.uniswapPair.address,
-      this.marketplace.address,
-      this.weth.address,
-      this.buyerContract.address,
+      uniswapPair.address,
+      marketplace.address,
+      weth.address,
+      devsContract.address,
       AMOUNT_OF_NFTS,
       NFT_PRICE
     );
@@ -140,12 +140,12 @@ describe("[Challenge] Free Rider", function () {
     // TODO: check NFTs are transfered to buyer contract
     // Attacker must have earned all ETH from the payout
     console.log(
-      `Attackers Balance: ${await ethers.utils.formatEther(
+      `Attackers Balance: ${ethers.utils.formatEther(
         await (await ethers.provider.getBalance(attacker.address)).toString()
       )}`
     );
     console.log(
-      `Buyers Contract Balance: ${await ethers.utils.formatEther(
+      `Buyers Contract Balance: ${ethers.utils.formatEther(
         await ethers.provider.getBalance(this.buyerContract.address)
       )}`
     );

