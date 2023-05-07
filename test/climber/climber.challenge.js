@@ -64,10 +64,10 @@ describe("[Challenge] Climber", function () {
 
   it("Execution", async function () {
     /** CODE YOUR SOLUTION HERE */
-    this.climberHack = await (
-      await ethers.getContractFactory("ClimberHack", attacker)
-    ).deploy(this.timelock.address, this.vault.address, this.token.address);
-    await this.climberHack.executeProposal();
+    const climberHack = await (
+      await ethers.getContractFactory("ClimberHack", player)
+    ).deploy(timelock.address, vault.address, token.address);
+    await climberHack.executeProposal();
   });
 
   after(async function () {

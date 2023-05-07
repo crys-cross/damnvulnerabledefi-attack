@@ -48,16 +48,16 @@ describe("[Challenge] Backdoor", function () {
   it("Execution", async function () {
     /** CODE YOUR SOLUTION HERE */
     this.backdoorHack = await (
-      await ethers.getContractFactory("BackdoorHack", attacker)
+      await ethers.getContractFactory("BackdoorHack", player)
     ).deploy(
-      this.masterCopy.address,
-      this.walletFactory.address,
-      this.walletRegistry.address,
-      this.token.address
+      masterCopy.address,
+      walletFactory.address,
+      walletRegistry.address,
+      token.address
     );
 
     // Attack
-    await this.backdoorHack.connect(attacker).attack(users);
+    await this.backdoorHack.connect(player).attack(users);
   });
 
   after(async function () {
