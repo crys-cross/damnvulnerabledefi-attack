@@ -126,7 +126,7 @@ describe("[Challenge] Free Rider", function () {
 
   it("Execution", async function () {
     /** CODE YOUR SOLUTION HERE */
-    this.freeRiderHack = await (
+    const freeRiderHack = await (
       await ethers.getContractFactory("FreeRiderHack", player)
     ).deploy(
       uniswapPair.address,
@@ -136,7 +136,7 @@ describe("[Challenge] Free Rider", function () {
       AMOUNT_OF_NFTS,
       NFT_PRICE
     );
-    await this.freeRiderHack.attack();
+    await freeRiderHack.attack();
     // TODO: check NFTs are transfered to buyer contract
     // Attacker must have earned all ETH from the payout
     console.log(
