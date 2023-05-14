@@ -119,9 +119,13 @@ describe("[Challenge] Puppet", function () {
       token.address,
       uniswapExchange.address,
       lendingPool.address,
-      POOL_INITIAL_TOKEN_BALANCE
+      POOL_INITIAL_TOKEN_BALANCE,
+      { value: ethers.utils.parseEther("15") }
     );
-    puppetHack.attack();
+    // await token
+    //   .connect(player)
+    //   .transfer(puppetHack.address, PLAYER_INITIAL_TOKEN_BALANCE);
+    // await puppetHack.attack();
 
     // // connecting attacker to contracts
     // const attackToken = token.connect(player);
