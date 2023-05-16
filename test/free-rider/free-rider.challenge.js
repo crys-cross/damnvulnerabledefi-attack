@@ -133,6 +133,7 @@ describe("[Challenge] Free Rider", function () {
       marketplace.address,
       weth.address,
       devsContract.address,
+      nft.address,
       AMOUNT_OF_NFTS,
       NFT_PRICE
     );
@@ -140,24 +141,22 @@ describe("[Challenge] Free Rider", function () {
     // TODO: check NFTs are transfered to buyer contract
     // Attacker must have earned all ETH from the payout
     console.log(
-      `Attackers Balance: ${ethers.utils.formatEther(
-        await (await ethers.provider.getBalance(attacker.address)).toString()
+      `Players Balance: ${ethers.utils.formatEther(
+        await (await ethers.provider.getBalance(player.address)).toString()
       )}`
     );
     console.log(
       `Buyers Contract Balance: ${ethers.utils.formatEther(
-        await ethers.provider.getBalance(this.buyerContract.address)
+        await ethers.provider.getBalance(devsContract.address)
       )}`
     );
     // The buyer extracts all NFTs from its associated contract
     // Exchange must have lost NFTs and ETH
-    console.log(
-      `Amount of NFT for sale: ${await this.marketplace.amountOfOffers()}`
-    );
+    console.log(`Amount of NFT for sale: ${await marketplace.offersCount()}`);
     console.log(
       "NFTmarketplace balance is: ",
       await ethers.utils
-        .formatEther(await ethers.provider.getBalance(this.marketplace.address))
+        .formatEther(await ethers.provider.getBalance(marketplace.address))
         .toString()
     );
   });

