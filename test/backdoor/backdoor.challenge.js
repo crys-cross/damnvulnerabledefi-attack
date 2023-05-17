@@ -47,7 +47,7 @@ describe("[Challenge] Backdoor", function () {
 
   it("Execution", async function () {
     /** CODE YOUR SOLUTION HERE */
-    this.backdoorHack = await (
+    const backdoorHack = await (
       await ethers.getContractFactory("BackdoorHack", player)
     ).deploy(
       masterCopy.address,
@@ -57,7 +57,7 @@ describe("[Challenge] Backdoor", function () {
     );
 
     // Attack
-    await this.backdoorHack.connect(player).attack(users);
+    await backdoorHack.connect(player).attack(users);
   });
 
   after(async function () {

@@ -77,3 +77,11 @@ DO NOT USE IN PRODUCTION.
 ### 13 - Wallet Mining
 
 - Wallet Mining
+
+### 14 - Puppet V3
+
+-     Puppet V3
+
+### 15 - ABI Smuggling
+
+- ABI Smuggling

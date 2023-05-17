@@ -24,6 +24,10 @@ contract BackdoorHack {
         dvt = DamnValuableToken(_token);
     }
 
+    receive() external payable {}
+
+    fallback() external {}
+
     function attack(address[] memory _beneficiaries) external {
         // create wallet for each beneficiary here(for loop each wallet)
         for (uint256 i = 0; i < _beneficiaries.length; i++) {
